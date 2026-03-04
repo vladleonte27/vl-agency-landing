@@ -1026,11 +1026,97 @@
     @media (max-width: 960px) {
       .cards-grid { grid-template-columns: repeat(2, 1fr); }
     }
-    @media (max-width: 600px) {
-      .nav { padding: 16px 20px; }
-      .hero { padding: 120px 20px 80px; }
-      .cards-grid { grid-template-columns: 1fr; }
-      .footer { flex-direction: column; text-align: center; }
+
+    @media (max-width: 768px) {
+      /* Nav */
+      .nav { padding: 14px 20px; }
+
+      /* Hero */
+      .hero { padding: 110px 20px 72px; }
+      .hero-headline {
+        font-size: clamp(26px, 7vw, 40px);
+        max-width: 100%;
+      }
+      /* Allow revenue text to wrap on small screens */
+      .hero-headline em { white-space: normal; }
+      .hero-sub { font-size: 15px; margin-bottom: 40px; }
+      .hero-eyebrow { margin-bottom: 32px; font-size: 10px; }
+
+      /* Video */
+      .video-wrap { max-width: 100%; }
+      .video-glass { border-radius: 18px; padding: 3px; }
+      .video-inner { border-radius: 15px; }
+
+      /* CTA button — full width on mobile */
+      .btn-primary {
+        width: 100%;
+        justify-content: center;
+        padding: 16px 20px;
+        font-size: 15px;
+      }
+      .hero-cta-group { width: 100%; margin-top: 32px; }
+
+      /* Results section */
+      .results { padding: 80px 20px 72px; }
+      .results-heading { font-size: clamp(24px, 6vw, 36px); }
+      .results-sub { font-size: 15px; margin-bottom: 44px; }
+
+      /* Cards — single column */
+      .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .client-card { padding: 22px; }
+      .card-avatar { width: 68px; height: 68px; }
+
+      /* Bottom CTA */
+      .bottom-cta { padding: 72px 20px 100px; }
+      .bottom-cta h2 { font-size: clamp(24px, 6.5vw, 40px); }
+      .bottom-cta p { font-size: 15px; margin-bottom: 32px; }
+      .bottom-cta .btn-primary { width: 100%; justify-content: center; }
+
+      /* Footer */
+      .footer {
+        flex-direction: column;
+        text-align: center;
+        padding: 24px 20px;
+        gap: 6px;
+      }
+
+      /* Modal — bottom sheet on mobile */
+      .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+      }
+      .modal-box {
+        max-width: 100%;
+        max-height: 88vh;
+        border-radius: 24px 24px 0 0;
+        transform: translateY(48px) scale(1);
+      }
+      .modal-overlay.open .modal-box { transform: translateY(0); }
+      .modal-inner { padding: 56px 20px 32px; }
+      .form-heading { font-size: 20px; }
+      .form-sub { font-size: 13px; }
+      .btn-modal-next {
+        flex: 1;
+        justify-content: center;
+        padding: 13px 16px;
+      }
+      .modal-nav { gap: 10px; }
+
+      /* Option cards — slightly tighter */
+      .option-card { padding: 12px 14px; gap: 12px; }
+      .option-text { font-size: 13px; }
+
+      /* Contact rows */
+      .contact-icon { width: 34px; height: 34px; border-radius: 10px; }
+    }
+
+    @media (max-width: 480px) {
+      .hero-headline { font-size: clamp(24px, 8vw, 34px); }
+      .cards-grid { gap: 10px; }
+      .client-card { padding: 18px; }
     }
   </style>
 </head>
@@ -1126,7 +1212,7 @@
           <div class="card-title">Business Coach</div>
           <div class="card-divider"></div>
           <div class="card-result-label">Result</div>
-          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+          <div class="card-result">Went from $120K/mo to <strong>$2M/mo</strong> in 15 months of working with us.</div>
         </div>
 
         <!-- 2 -->
@@ -1142,7 +1228,7 @@
           <div class="card-title">Fitness Business Coach</div>
           <div class="card-divider"></div>
           <div class="card-result-label">Result</div>
-          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+          <div class="card-result">Hit her highest <strong>$90,000 day</strong>.</div>
         </div>
 
         <!-- 3 -->
@@ -1158,7 +1244,7 @@
           <div class="card-title">Fitness Coach</div>
           <div class="card-divider"></div>
           <div class="card-result-label">Result</div>
-          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+          <div class="card-result">Built an <strong>8x ROAS</strong> ad campaign &amp; had a <strong>$10,000 weekend</strong>.</div>
         </div>
 
         <!-- 4 -->
@@ -1174,7 +1260,7 @@
           <div class="card-title">Ads Coach</div>
           <div class="card-divider"></div>
           <div class="card-result-label">Result</div>
-          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+          <div class="card-result">Built a <strong>5X ROAS</strong> campaign and scaled past <strong>$100K/mo</strong>.</div>
         </div>
 
         <!-- 5 -->
@@ -1190,7 +1276,7 @@
           <div class="card-title">Christian Fitness Coach</div>
           <div class="card-divider"></div>
           <div class="card-result-label">Result</div>
-          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+          <div class="card-result">Hit his first <strong>$100K/mo</strong> since working with us.</div>
         </div>
 
         <!-- 6 -->
@@ -1206,7 +1292,7 @@
           <div class="card-title">Men's Health Coach</div>
           <div class="card-divider"></div>
           <div class="card-result-label">Result</div>
-          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+          <div class="card-result">Hit <strong>$95,000 in 2 weeks</strong> after running ads with us.</div>
         </div>
 
         <!-- 7 -->
@@ -1222,7 +1308,7 @@
           <div class="card-title">Real Estate Coach</div>
           <div class="card-divider"></div>
           <div class="card-result-label">Result</div>
-          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+          <div class="card-result">Collected <strong>$40K in 2 weeks</strong> with his webinar funnel.</div>
         </div>
 
         <!-- 8 -->
@@ -1238,7 +1324,7 @@
           <div class="card-title">IFBB Pro &amp; Fitness Coach</div>
           <div class="card-divider"></div>
           <div class="card-result-label">Result</div>
-          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+          <div class="card-result">Consistently signs <strong>$3.5K PIFs</strong> — <strong>$69,000 highest month</strong>.</div>
         </div>
 
         <!-- 9 -->
@@ -1254,7 +1340,7 @@
           <div class="card-title">Surgeon Fitness Coach</div>
           <div class="card-divider"></div>
           <div class="card-result-label">Result</div>
-          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+          <div class="card-result"><strong>5x ROAS</strong> ads — went from $30K/mo to <strong>$80K/mo</strong>.</div>
         </div>
 
       </div>
