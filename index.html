@@ -1022,6 +1022,75 @@
     /* Make .ty-video relative for poster */
     .ty-video { position: relative; }
 
+    /* ─── Mobile Performance — strip GPU-heavy effects ─── */
+    @media (max-width: 768px) {
+      /* Kill the parallax orbs entirely — 4 × blur(100px) is the #1 perf killer */
+      .bg-layer { display: none; }
+
+      /* Kill grain overlay — one less composited layer */
+      body::before { display: none; }
+
+      /* Nav — solid bg instead of backdrop-filter */
+      .nav {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(5,5,15,0.97);
+      }
+
+      /* Cards — replace expensive glass blur with simple solid */
+      .client-card {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(255,255,255,0.045);
+        will-change: auto;
+      }
+      /* Disable card hover transform (no hover on touch anyway) */
+      .client-card:hover { transform: none; box-shadow: none; }
+      /* Hide card sweeps (hover-only, irrelevant on touch) */
+      .card-sweep { display: none; }
+
+      /* Video — drop backdrop-filter */
+      .video-glass {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(255,255,255,0.03);
+      }
+      .video-sweep { display: none; }
+
+      /* Modal — solid background, no blur */
+      .modal-overlay {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(3,3,12,0.97);
+      }
+      .modal-box {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(8,8,20,0.99);
+      }
+
+      /* Stop all continuous CSS animations */
+      .orb { animation: none; }
+      .eyebrow-pulse { animation: none; opacity: 1; }
+      .video-sweep { animation: none; }
+
+      /* Text shimmer — replace with static blue instead of animated gradient */
+      .hero-headline em {
+        animation: none;
+        background: none;
+        -webkit-text-fill-color: #6877ff;
+        color: #6877ff;
+      }
+
+      /* Disable btn sweep animation */
+      .btn-primary:hover .btn-sweep { animation: none; }
+
+      /* Remove will-change hints that force GPU layers */
+      .orb-track { will-change: auto; }
+      .btn-primary { will-change: auto; }
+      .client-card { will-change: auto; }
+    }
+
     /* ─── Responsive ─── */
     @media (max-width: 960px) {
       .cards-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1206,7 +1275,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           </a>
           <div class="card-avatar">
-            <img src="Profile%20Pictures/Will%20Nelson.jpg" alt="Will Nelson" />
+            <img loading="lazy" src="Profile%20Pictures/Will%20Nelson.jpg" alt="Will Nelson" />
           </div>
           <div class="card-name">Will Nelson</div>
           <div class="card-title">Business Coach</div>
@@ -1222,7 +1291,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           </a>
           <div class="card-avatar">
-            <img src="Profile%20Pictures/Rachel%20Scheer.jpg" alt="Rachel Scheer" />
+            <img loading="lazy" src="Profile%20Pictures/Rachel%20Scheer.jpg" alt="Rachel Scheer" />
           </div>
           <div class="card-name">Rachel Scheer</div>
           <div class="card-title">Fitness Business Coach</div>
@@ -1238,7 +1307,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           </a>
           <div class="card-avatar">
-            <img src="Profile%20Pictures/Nick%20Burns.jpg" alt="Nick Burns" />
+            <img loading="lazy" src="Profile%20Pictures/Nick%20Burns.jpg" alt="Nick Burns" />
           </div>
           <div class="card-name">Nick Burns</div>
           <div class="card-title">Fitness Coach</div>
@@ -1254,7 +1323,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           </a>
           <div class="card-avatar">
-            <img src="Profile%20Pictures/Azri%20Zakariya.jpg" alt="Azri Zakariya" />
+            <img loading="lazy" src="Profile%20Pictures/Azri%20Zakariya.jpg" alt="Azri Zakariya" />
           </div>
           <div class="card-name">Azri Zakariya</div>
           <div class="card-title">Ads Coach</div>
@@ -1270,7 +1339,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           </a>
           <div class="card-avatar">
-            <img src="Profile%20Pictures/Caleb%20Hammett.jpg" alt="Caleb Hammett" />
+            <img loading="lazy" src="Profile%20Pictures/Caleb%20Hammett.jpg" alt="Caleb Hammett" />
           </div>
           <div class="card-name">Caleb Hammett</div>
           <div class="card-title">Christian Fitness Coach</div>
@@ -1286,7 +1355,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           </a>
           <div class="card-avatar">
-            <img src="Profile%20Pictures/Ali%20Gilbert.jpg" alt="Ali Gilbert" />
+            <img loading="lazy" src="Profile%20Pictures/Ali%20Gilbert.jpg" alt="Ali Gilbert" />
           </div>
           <div class="card-name">Ali Gilbert</div>
           <div class="card-title">Men's Health Coach</div>
@@ -1302,7 +1371,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           </a>
           <div class="card-avatar">
-            <img src="Profile%20Pictures/Tony%20Stephan.jpg" alt="Tony Stephan" />
+            <img loading="lazy" src="Profile%20Pictures/Tony%20Stephan.jpg" alt="Tony Stephan" />
           </div>
           <div class="card-name">Tony Stephan</div>
           <div class="card-title">Real Estate Coach</div>
@@ -1318,7 +1387,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           </a>
           <div class="card-avatar">
-            <img src="Profile%20Pictures/Danielle%20Ruban.jpg" alt="Danielle Ruban" />
+            <img loading="lazy" src="Profile%20Pictures/Danielle%20Ruban.jpg" alt="Danielle Ruban" />
           </div>
           <div class="card-name">Danielle Ruban</div>
           <div class="card-title">IFBB Pro &amp; Fitness Coach</div>
@@ -1334,7 +1403,7 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           </a>
           <div class="card-avatar">
-            <img src="Profile%20Pictures/Mike%20Coval.jpg" alt="Mike Coval" />
+            <img loading="lazy" src="Profile%20Pictures/Mike%20Coval.jpg" alt="Mike Coval" />
           </div>
           <div class="card-name">Mike Coval</div>
           <div class="card-title">Surgeon Fitness Coach</div>
@@ -1789,29 +1858,29 @@
       });
     });
 
-    // ─── Parallax
-    // JS only ever touches .orb-track transform.
-    // CSS float animation only ever touches .orb transform.
-    // No conflict possible.
-    const t1 = document.getElementById('t1');
-    const t2 = document.getElementById('t2');
-    const t3 = document.getElementById('t3');
-    const t4 = document.getElementById('t4');
+    // ─── Parallax (desktop only — skip entirely on mobile)
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          const y = window.scrollY;
-          t1.style.transform = `translateY(${y * 0.18}px)`;
-          t2.style.transform = `translateY(${y * -0.13}px)`;
-          t3.style.transform = `translateY(${y * 0.09}px)`;
-          t4.style.transform = `translateY(${y * -0.22}px)`;
-          ticking = false;
-        });
-        ticking = true;
-      }
-    }, { passive: true });
+    if (!isMobile) {
+      const t1 = document.getElementById('t1');
+      const t2 = document.getElementById('t2');
+      const t3 = document.getElementById('t3');
+      const t4 = document.getElementById('t4');
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const y = window.scrollY;
+            t1.style.transform = `translateY(${y * 0.18}px)`;
+            t2.style.transform = `translateY(${y * -0.13}px)`;
+            t3.style.transform = `translateY(${y * 0.09}px)`;
+            t4.style.transform = `translateY(${y * -0.22}px)`;
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true });
+    }
 
     // ─── Scroll-reveal
     const revealEls = document.querySelectorAll('.reveal');
@@ -1835,20 +1904,22 @@
     }, { threshold: 0.06, rootMargin: '0px 0px -20px 0px' });
     cardEls.forEach(el => cardObs.observe(el));
 
-    // ─── Cursor-aware radial glow on cards
-    cardEls.forEach(card => {
-      card.addEventListener('mousemove', e => {
-        const r = card.getBoundingClientRect();
-        const x = ((e.clientX - r.left) / r.width  * 100).toFixed(1);
-        const y = ((e.clientY - r.top)  / r.height * 100).toFixed(1);
-        card.style.background = `
-          radial-gradient(circle at ${x}% ${y}%, rgba(32,44,255,0.09) 0%, rgba(255,255,255,0.02) 55%),
-          linear-gradient(135deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.01) 60%)`;
+    // ─── Cursor-aware radial glow on cards (desktop only)
+    if (!isMobile) {
+      cardEls.forEach(card => {
+        card.addEventListener('mousemove', e => {
+          const r = card.getBoundingClientRect();
+          const x = ((e.clientX - r.left) / r.width  * 100).toFixed(1);
+          const y = ((e.clientY - r.top)  / r.height * 100).toFixed(1);
+          card.style.background = `
+            radial-gradient(circle at ${x}% ${y}%, rgba(32,44,255,0.09) 0%, rgba(255,255,255,0.02) 55%),
+            linear-gradient(135deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.01) 60%)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.background = '';
+        });
       });
-      card.addEventListener('mouseleave', () => {
-        card.style.background = '';
-      });
-    });
+    }
   </script>
 
 </body>
