@@ -1548,96 +1548,16 @@
   </div><!-- /.modal-overlay -->
 
   <script>
-    // ─── Resend Email Config ──────────────────────────────────────────────
-    // Set your Resend API key and destination email below.
-    // The key will be requested after setup — leave as-is for now.
-    const RESEND = {
-      apiKey:    're_QKg6L56R_EvehL1N38v2BRv22Bnr8v87w',
-      toEmail:   'vlad@vlmedia.online',      // ← your email to receive leads
-      fromEmail: 'onboarding@resend.dev',  // ← change to your verified domain once set up
-    };
-
+    // ─── Send lead email via serverless function (avoids CORS) ───────────
     async function sendLeadEmail(data) {
-      if (!RESEND.apiKey || RESEND.apiKey === 'YOUR_RESEND_API_KEY') return; // skip if unconfigured
-
-      const situationMap = {
-        A: 'Runs ads, but results could be better',
-        B: 'Has offer & audience, needs content + funnel',
-        C: 'Ads work, needs better creatives to convert',
-        D: 'Just starting out, needs a roadmap',
-      };
-      const challengeMap = {
-        A: 'No time to create content — needs it done-for-them',
-        B: 'Content not getting clients',
-        C: 'Ads need better creatives',
-        D: 'Needs a funnel that turns content into paying clients',
-      };
-      const revenueMap = { A: '$0 – $10K/mo', B: '$10K – $30K/mo', C: '$30K – $50K/mo', D: '$50K+/mo' };
-      const investMap  = { A: '$0 (not ready)', B: '$0 – $500/mo', C: '$500 – $1,000/mo', D: '$1,000+/mo' };
-
-      const pill = (txt, color) =>
-        `<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:${color}20;color:${color};border:1px solid ${color}40">${txt}</span>`;
-
-      const row = (label, val, accent) => val ? `
-        <tr>
-          <td style="padding:12px 0;border-bottom:1px solid #12122a;color:#6b7280;font-size:13px;font-weight:500;width:36%;vertical-align:middle">${label}</td>
-          <td style="padding:12px 0;border-bottom:1px solid #12122a;font-size:14px;font-weight:600;color:${accent||'#fff'}">${val}</td>
-        </tr>` : '';
-
-      const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0a0a12;font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif">
-        <div style="max-width:580px;margin:32px auto;border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.6)">
-
-          <!-- Header -->
-          <div style="background:linear-gradient(135deg,#2030ff 0%,#1018cc 100%);padding:28px 32px 24px">
-            <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.55)">VL Agency — New Lead</p>
-            <h1 style="margin:0;font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.02em">New Application Received</h1>
-            <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.65)">Someone just applied to work with you — reach out within 24 h.</p>
-          </div>
-
-          <!-- Contact block -->
-          <div style="background:#0f0f1e;padding:24px 32px 4px;border-bottom:1px solid #1a1a30">
-            <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#3a48ff">Contact</p>
-            <table style="width:100%;border-collapse:collapse">
-              ${row('Name', `<strong>${data.name}</strong>`)}
-              ${row('Instagram', data.instagram ? `<a href="https://instagram.com/${data.instagram.replace('@','')}" style="color:#6877ff;text-decoration:none">@${data.instagram.replace('@','')}</a>` : '')}
-              ${row('Email', data.email ? `<a href="mailto:${data.email}" style="color:#6877ff;text-decoration:none">${data.email}</a>` : '')}
-              ${row('Phone', data.phone)}
-            </table>
-          </div>
-
-          <!-- Qualification block -->
-          <div style="background:#0f0f1e;padding:24px 32px 4px;border-bottom:1px solid #1a1a30">
-            <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#3a48ff">Qualification</p>
-            <table style="width:100%;border-collapse:collapse">
-              ${row('Situation',  situationMap[data.q2], '#e2e8f0')}
-              ${row('Challenge',  challengeMap[data.q3], '#e2e8f0')}
-              ${row('Revenue',    pill(revenueMap[data.q4], '#22c55e'), '#fff')}
-              ${row('Investment', pill(investMap[data.q5],  '#f59e0b'), '#fff')}
-            </table>
-          </div>
-
-          <!-- Footer -->
-          <div style="background:#08081a;padding:16px 32px;display:flex;align-items:center;justify-content:space-between">
-            <span style="font-size:12px;color:#374151">Sent from your VSL landing page</span>
-            <span style="font-size:11px;color:#1f2937;letter-spacing:0.08em;text-transform:uppercase">VL Agency</span>
-          </div>
-
-        </div>
-      </body></html>`;
-
       try {
-        await fetch('https://api.resend.com/emails', {
+        await fetch('/api/send', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + RESEND.apiKey },
-          body: JSON.stringify({
-            from: RESEND.fromEmail,
-            to:   [RESEND.toEmail],
-            subject: `New Application: ${data.name}`,
-            html,
-          }),
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
         });
       } catch (err) {
-        console.warn('Resend notification failed (will not block form):', err);
+        console.warn('Email notification failed (will not block form):', err);
       }
     }
 
