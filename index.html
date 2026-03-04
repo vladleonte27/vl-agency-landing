@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Why Your Content & Ads System Keeps You Stuck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:         #202cff;
+      --blue-mid:     #3a48ff;
+      --blue-light:   #6877ff;
+      --blue-glow:    rgba(32,44,255,0.35);
+      --bg:           #05050f;
+      --text:         #ffffff;
+      --text-muted:   #8891b8;
+      --text-dim:     #4a5070;
+      --glass-bg:     rgba(255,255,255,0.035);
+      --glass-border: rgba(255,255,255,0.08);
+      --radius-xl:    28px;
+      --radius-card:  24px;
+    }
+
+    /* overflow-x: hidden on html breaks native smooth scroll in Firefox — keep only on body */
+    html { overflow-x: hidden; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ─── Grain Overlay ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.026;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ─── Parallax Background
+         FIX: .orb-track = JS scroll transform (no CSS animation)
+              .orb       = CSS float animation only
+         The two transforms are on separate elements so they never conflict.   ─── */
+    .bg-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    /* Parallax wrapper — only JS touches this transform */
+    .orb-track {
+      position: absolute;
+      will-change: transform;
+    }
+    .orb-track-1 { top: -200px; left: -150px; }
+    .orb-track-2 { top: 40%;   right: -100px; }
+    .orb-track-3 { bottom: -100px; left: 30%; }
+    .orb-track-4 { top: 20%;   left: 55%; }
+
+    /* Orb — only CSS float animation touches this transform */
+    .orb {
+      border-radius: 50%;
+      filter: blur(100px);
+    }
+    .orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, rgba(32,44,255,0.28) 0%, transparent 70%); animation: float 18s ease-in-out infinite; }
+    .orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(32,44,255,0.18) 0%, transparent 70%); animation: float 24s ease-in-out infinite 4s reverse; }
+    .orb-3 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(58,72,255,0.12) 0%, transparent 70%); animation: float 20s ease-in-out infinite 8s; }
+    .orb-4 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(32,44,255,0.22) 0%, transparent 70%); animation: float 16s ease-in-out infinite 2s reverse; }
+
+    /* ─── Page ─── */
+    .page { position: relative; z-index: 1; }
+
+    /* ─── Nav ─── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 18px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5,5,15,0.55);
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .nav-wordmark {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .nav-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--blue);
+      margin-right: 8px;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
+
+    /* ─── Hero ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 140px 24px 100px;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--blue-light);
+      background: rgba(32,44,255,0.1);
+      border: 1px solid rgba(32,44,255,0.25);
+      padding: 7px 16px;
+      border-radius: 100px;
+      margin-bottom: 44px;
+      opacity: 0;
+      animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.1s forwards;
+    }
+    .eyebrow-pulse {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--blue-light);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .hero-headline {
+      max-width: 820px;
+      font-size: clamp(22px, 3.2vw, 46px);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      color: #fff;
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.25s forwards;
+    }
+    .hero-headline em {
+      font-style: normal;
+      white-space: nowrap;
+      /* shimmer sweep on the revenue range text */
+      background: linear-gradient(
+        90deg,
+        #5566ff 0%,
+        #202cff 18%,
+        #8899ff 38%,
+        #ffffff 50%,
+        #8899ff 62%,
+        #202cff 82%,
+        #5566ff 100%
+      );
+      background-size: 250% 100%;
+      background-position: 100% 0;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: textShimmer 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    .hero-sub {
+      max-width: 520px;
+      font-size: 17px;
+      font-weight: 400;
+      line-height: 1.65;
+      color: var(--text-muted);
+      margin-bottom: 64px;
+      opacity: 0;
+      animation: fadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.4s forwards;
+    }
+
+    /* ─── Video ─── */
+    .video-wrap {
+      width: 100%;
+      max-width: 860px;
+      opacity: 0;
+      animation: fadeUp 1s cubic-bezier(0.22,1,0.36,1) 0.55s forwards;
+    }
+    .video-glass {
+      position: relative;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      background: var(--glass-bg);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.03) inset,
+        0 60px 120px rgba(0,0,0,0.7),
+        0 0 80px rgba(32,44,255,0.22),
+        0 0 160px rgba(32,44,255,0.08);
+      padding: 4px;
+    }
+    /* Top highlight strip */
+    .video-glass::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), rgba(255,255,255,0.14), transparent);
+      z-index: 4;
+    }
+    /* Corner shine gradient */
+    .video-glass::after {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border-radius: calc(var(--radius-xl) - 2px);
+      background: linear-gradient(135deg, rgba(255,255,255,0.055) 0%, transparent 45%);
+      pointer-events: none;
+      z-index: 3;
+    }
+    /* Sweeping light across video glass — slow and rare */
+    .video-sweep {
+      position: absolute;
+      top: 0; left: 0;
+      width: 35%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04) 50%, transparent);
+      transform: skewX(-18deg) translateX(-200%);
+      animation: sweep 14s cubic-bezier(0.4,0,0.2,1) infinite 2s;
+      pointer-events: none;
+      z-index: 4;
+    }
+    .video-inner {
+      position: relative;
+      border-radius: calc(var(--radius-xl) - 4px);
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      background: #0d0d1e;
+    }
+    .video-inner iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* ─── CTA ─── */
+    .hero-cta-group {
+      margin-top: 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      opacity: 0;
+      animation: fadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.7s forwards;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 36px;
+      background: linear-gradient(135deg, var(--blue-mid) 0%, var(--blue) 60%, #1620cc 100%);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      border: none;
+      border-radius: 100px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.12) inset,
+        0 8px 32px rgba(32,44,255,0.5),
+        0 2px 8px rgba(0,0,0,0.4);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Top dome highlight */
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 50%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.13), transparent);
+      border-radius: 100px 100px 0 0;
+      pointer-events: none;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.15) inset,
+        0 12px 40px rgba(32,44,255,0.65),
+        0 4px 12px rgba(0,0,0,0.5);
+      filter: brightness(1.08);
+    }
+    .btn-primary:active { transform: translateY(0) scale(0.99); }
+    /* Hover sweep on button */
+    .btn-sweep {
+      position: absolute;
+      top: -30%;
+      left: 0;
+      width: 45%;
+      height: 160%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18) 50%, transparent);
+      transform: skewX(-20deg) translateX(-200%);
+      pointer-events: none;
+    }
+    .btn-primary:hover .btn-sweep {
+      animation: btnSweep 1.1s ease forwards;
+    }
+    .btn-note {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: 400;
+    }
+
+    /* ─── Divider ─── */
+    .section-divider {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    }
+
+    /* ─── Results Section ─── */
+    .results {
+      padding: 120px 24px;
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-label-line {
+      width: 40px;
+      height: 1px;
+      background: var(--blue);
+      opacity: 0.6;
+    }
+    .section-label-text {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--blue-light);
+    }
+    .results-heading {
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+    .results-sub {
+      font-size: 16px;
+      color: var(--text-muted);
+      font-weight: 400;
+      max-width: 480px;
+      line-height: 1.6;
+      margin-bottom: 64px;
+    }
+
+    /* ─── Cards Grid ─── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .client-card {
+      position: relative;
+      border-radius: var(--radius-card);
+      /* Liquid glass layers */
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.01) 60%),
+        var(--glass-bg);
+      backdrop-filter: blur(40px) saturate(200%);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      border: 1px solid var(--glass-border);
+      padding: 28px;
+      overflow: hidden;
+      transition:
+        transform 0.35s cubic-bezier(0.22,1,0.36,1),
+        box-shadow 0.35s cubic-bezier(0.22,1,0.36,1),
+        border-color 0.35s ease;
+      opacity: 0;
+      transform: translateY(24px);
+    }
+    .client-card.visible {
+      animation: cardIn 0.7s cubic-bezier(0.22,1,0.36,1) forwards;
+    }
+    /* Top highlight strip */
+    .client-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), rgba(255,255,255,0.1), transparent);
+      z-index: 2;
+    }
+    /* Right-side edge shine */
+    .client-card::after {
+      content: '';
+      position: absolute;
+      top: 10%; right: 0;
+      width: 1px;
+      height: 40%;
+      background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.06), transparent);
+      z-index: 2;
+    }
+    .client-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(32,44,255,0.32);
+      box-shadow:
+        0 0 0 1px rgba(32,44,255,0.1) inset,
+        0 28px 64px rgba(0,0,0,0.55),
+        0 0 48px rgba(32,44,255,0.14);
+    }
+
+    /* ─── Card light sweep — hover only ─── */
+    .card-sweep {
+      position: absolute;
+      top: -20%;
+      left: 0;
+      width: 38%;
+      height: 140%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.07) 50%, transparent);
+      transform: skewX(-18deg) translateX(-200%);
+      pointer-events: none;
+      z-index: 3;
+      /* no animation by default */
+    }
+    /* Trigger on card hover */
+    .client-card:hover .card-sweep {
+      animation: cardHoverSweep 1.2s ease forwards;
+    }
+    @keyframes cardHoverSweep {
+      from { transform: skewX(-18deg) translateX(-200%); opacity: 0; }
+      10%  { opacity: 1; }
+      85%  { opacity: 1; }
+      to   { transform: skewX(-18deg) translateX(400%);  opacity: 0; }
+    }
+
+    /* ─── Card internals ─── */
+    .card-avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(32,44,255,0.3), rgba(58,72,255,0.08));
+      border: 1px solid rgba(32,44,255,0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .card-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      display: block;
+    }
+    /* Subtle shine ring over photo */
+    .card-avatar::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Instagram icon — top-right of card */
+    .card-ig-link {
+      position: absolute;
+      top: 18px; right: 18px;
+      width: 30px; height: 30px;
+      border-radius: 9px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: background 0.22s, border-color 0.22s, color 0.22s, transform 0.22s;
+      z-index: 4;
+    }
+    .card-ig-link:hover {
+      background: rgba(225,48,108,0.14);
+      border-color: rgba(225,48,108,0.35);
+      color: #e1306c;
+      transform: scale(1.1);
+    }
+    .card-name {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+    .card-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--blue-light);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .card-divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.07), transparent);
+      margin-bottom: 18px;
+    }
+    .card-result-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+    .card-result {
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+    .card-result strong {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* ─── Bottom CTA ─── */
+    .bottom-cta {
+      padding: 100px 24px 140px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+    .bottom-cta-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 50% at 50% 100%, rgba(32,44,255,0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .bottom-cta h2 {
+      font-size: clamp(28px, 4vw, 52px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      max-width: 640px;
+      margin-bottom: 20px;
+    }
+    .bottom-cta p {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 440px;
+      line-height: 1.65;
+      margin-bottom: 40px;
+    }
+
+    /* ─── Footer ─── */
+    .footer {
+      padding: 32px 40px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .footer-logo {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .footer-copy {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* ─── Scroll-reveal ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity 0.8s cubic-bezier(0.22,1,0.36,1),
+        transform 0.8s cubic-bezier(0.22,1,0.36,1);
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+
+    /* ─── Keyframes ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1;   transform: scale(1); }
+      50%       { opacity: 0.5; transform: scale(0.8); }
+    }
+    /* Float — only used on .orb, never on .orb-track */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) translateX(0px); }
+      33%       { transform: translateY(-20px) translateX(10px); }
+      66%       { transform: translateY(12px) translateX(-8px); }
+    }
+    /* Text shimmer — moves the gradient background-position to create a light sweep */
+    @keyframes textShimmer {
+      0%   { background-position: 100% 0; }
+      50%  { background-position:   0% 0; }
+      100% { background-position: 100% 0; }
+    }
+    /* Sweep — 15% of cycle is the actual sweep, rest is invisible hold + reset */
+    @keyframes sweep {
+      0%           { transform: skewX(-18deg) translateX(-160%); opacity: 0; }
+      3%           { opacity: 1; }
+      12%          { opacity: 1; }
+      15%          { transform: skewX(-18deg) translateX(380%);  opacity: 0; }
+      15.01%, 100% { transform: skewX(-18deg) translateX(-160%); opacity: 0; }
+    }
+    /* One-shot button sweep on hover */
+    @keyframes btnSweep {
+      from { transform: skewX(-20deg) translateX(-200%); }
+      to   { transform: skewX(-20deg) translateX(500%); }
+    }
+
+    /* ─── Application Modal ─── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 600;
+      background: rgba(3,3,12,0.9);
+      backdrop-filter: blur(28px) saturate(140%);
+      -webkit-backdrop-filter: blur(28px) saturate(140%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+    }
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal-box {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border-radius: 28px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 60%),
+        rgba(8,8,20,0.92);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 48px 96px rgba(0,0,0,0.75),
+        0 0 80px rgba(32,44,255,0.18);
+      transform: translateY(28px) scale(0.97);
+      transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(32,44,255,0.3) transparent;
+    }
+    .modal-overlay.open .modal-box { transform: none; }
+    .modal-box::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      border-radius: 28px 28px 0 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .modal-inner { padding: 60px 40px 40px; }
+    .modal-close {
+      position: absolute;
+      top: 18px; right: 18px;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, color 0.2s;
+      z-index: 10;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+    /* Progress */
+    .modal-progress {
+      height: 2px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 2px;
+      margin-bottom: 28px;
+      overflow: hidden;
+    }
+    .modal-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), var(--blue-light));
+      border-radius: 2px;
+      transition: width 0.55s cubic-bezier(0.22,1,0.36,1);
+    }
+    .modal-step-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--blue-light);
+      margin-bottom: 10px;
+    }
+    /* Form typography */
+    .form-heading {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .form-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 28px;
+    }
+    /* Fields */
+    .field-group { margin-bottom: 18px; }
+    .field-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .field-note {
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--text-dim);
+    }
+    .field-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -webkit-appearance: none;
+    }
+    .field-input::placeholder { color: var(--text-dim); }
+    .field-input:focus {
+      border-color: rgba(32,44,255,0.5);
+      background: rgba(32,44,255,0.06);
+    }
+    .field-error {
+      font-size: 12px;
+      color: #ff6060;
+      margin-top: 6px;
+      display: none;
+    }
+    .field-error.show { display: block; }
+    /* Contact rows */
+    .contact-rows { display: flex; flex-direction: column; gap: 8px; }
+    .contact-row { display: flex; align-items: center; gap: 10px; }
+    .contact-icon {
+      width: 38px; height: 38px;
+      flex-shrink: 0;
+      border-radius: 11px;
+      background: rgba(32,44,255,0.1);
+      border: 1px solid rgba(32,44,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--blue-light);
+    }
+    /* Option cards */
+    .options-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+    .option-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.025);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.18s;
+      user-select: none;
+    }
+    .option-card:hover {
+      border-color: rgba(32,44,255,0.3);
+      background: rgba(32,44,255,0.07);
+      transform: translateX(3px);
+    }
+    .option-card.selected {
+      border-color: var(--blue);
+      background: rgba(32,44,255,0.13);
+    }
+    .option-badge {
+      width: 30px; height: 30px;
+      min-width: 30px;
+      border-radius: 9px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dim);
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .option-card.selected .option-badge {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue);
+    }
+    .option-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+      line-height: 1.45;
+      transition: color 0.2s;
+    }
+    .option-card.selected .option-text { color: #fff; }
+    /* Nav */
+    .modal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .btn-modal-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      padding: 8px 0;
+      transition: color 0.2s;
+    }
+    .btn-modal-back:hover { color: var(--text-muted); }
+    .btn-modal-next {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 26px;
+      background: linear-gradient(135deg, var(--blue-mid), var(--blue));
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 100px;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(32,44,255,0.4);
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-modal-next::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 50%;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.12), transparent);
+      border-radius: 100px 100px 0 0;
+      pointer-events: none;
+    }
+    .btn-modal-next:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 32px rgba(32,44,255,0.55);
+      filter: brightness(1.08);
+    }
+    /* Thank you */
+    .ty-icon {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(32,44,255,0.3), rgba(58,72,255,0.1));
+      border: 1px solid rgba(32,44,255,0.4);
+      margin: 0 auto 24px;
+      display: flex; align-items: center; justify-content: center;
+      animation: iconPop 0.5s cubic-bezier(0.22,1,0.36,1) 0.15s both;
+    }
+    @keyframes iconPop {
+      from { opacity: 0; transform: scale(0.5); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .ty-video {
+      margin: 20px 0;
+      border-radius: 16px;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      background: #0d0d1e;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 40px rgba(32,44,255,0.1);
+    }
+    .ty-video iframe { width: 100%; height: 100%; border: none; display: block; }
+    .ty-back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 26px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+    .ty-back-btn:hover { background: rgba(255,255,255,0.1); color: #fff; transform: translateY(-1px); }
+    /* Step transitions */
+    .form-step { display: none; }
+    .form-step.active { display: block; animation: stepIn 0.38s cubic-bezier(0.22,1,0.36,1); }
+    .modal-box.going-back .form-step.active { animation: stepInBack 0.38s cubic-bezier(0.22,1,0.36,1); }
+    @keyframes stepIn {
+      from { opacity: 0; transform: translateX(28px); }
+      to   { opacity: 1; transform: none; }
+    }
+    @keyframes stepInBack {
+      from { opacity: 0; transform: translateX(-28px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ─── YouTube Click-to-Play Poster ─── */
+    .yt-poster {
+      position: absolute;
+      inset: 0;
+      cursor: pointer;
+      overflow: hidden;
+      background: #0d0d1e;
+    }
+    .yt-poster img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.45s ease;
+    }
+    .yt-poster:hover img { transform: scale(1.03); }
+    .yt-play-btn {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.92);
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.55), 0 0 0 6px rgba(255,255,255,0.12);
+      transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), background 0.22s ease, box-shadow 0.22s ease;
+      pointer-events: none;
+    }
+    .yt-poster:hover .yt-play-btn {
+      transform: translate(-50%, -50%) scale(1.1);
+      background: #fff;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.65), 0 0 0 8px rgba(255,255,255,0.14);
+    }
+    /* Dark overlay on poster for contrast */
+    .yt-poster::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(5,5,20,0.28);
+      pointer-events: none;
+      transition: background 0.3s ease;
+    }
+    .yt-poster:hover::after { background: rgba(5,5,20,0.18); }
+    /* Make .ty-video relative for poster */
+    .ty-video { position: relative; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 960px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .nav { padding: 16px 20px; }
+      .hero { padding: 120px 20px 80px; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Parallax Background ─── -->
+  <div class="bg-layer">
+    <!-- Track: moved by JS scroll. Orb: animated by CSS float only. -->
+    <div class="orb-track orb-track-1" id="t1"><div class="orb orb-1"></div></div>
+    <div class="orb-track orb-track-2" id="t2"><div class="orb orb-2"></div></div>
+    <div class="orb-track orb-track-3" id="t3"><div class="orb orb-3"></div></div>
+    <div class="orb-track orb-track-4" id="t4"><div class="orb orb-4"></div></div>
+  </div>
+
+  <div class="page">
+
+    <!-- Nav -->
+    <nav class="nav">
+      <span class="nav-wordmark"><span class="nav-dot"></span>For Coaches</span>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+
+      <div class="hero-eyebrow">
+        <span class="eyebrow-pulse"></span>
+        Free Training &mdash; Watch Now
+      </div>
+
+      <h1 class="hero-headline">
+        Why your content &amp; ads system<br>keeps you stuck at <em>$10K&ndash;$50K/mo</em>
+      </h1>
+
+      <p class="hero-sub">
+        The exact reason most coaches plateau — and the overlooked shift that unlocks consistent, scalable revenue without burning out your audience.
+      </p>
+
+      <!-- Video -->
+      <div class="video-wrap">
+        <div class="video-glass">
+          <span class="video-sweep" aria-hidden="true"></span>
+          <div class="video-inner">
+            <div class="yt-poster" onclick="loadYT(this,'BtTRnjWHTUw')">
+              <img src="https://img.youtube.com/vi/BtTRnjWHTUw/maxresdefault.jpg" alt="Play VSL Video" />
+              <button class="yt-play-btn" aria-label="Play video" tabindex="-1">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style="margin-left:3px">
+                  <polygon points="5,3 21,12 5,21" fill="#202cff"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="hero-cta-group">
+        <a href="#" class="btn-primary" onclick="openModal(); return false;">
+          <span class="btn-sweep" aria-hidden="true"></span>
+          Apply to Work With Us
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2.5 7h9M7.5 3.5L11 7l-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <span class="btn-note">Takes 2 minutes &middot; No commitment</span>
+      </div>
+
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Results Section -->
+    <section class="results" id="results">
+
+      <div class="section-label reveal">
+        <span class="section-label-line"></span>
+        <span class="section-label-text">Client Results</span>
+      </div>
+      <h2 class="results-heading reveal">Real coaches.<br />Real numbers.</h2>
+      <p class="results-sub reveal">These aren't cherry-picked outliers. This is what happens when the system actually works.</p>
+
+      <div class="cards-grid">
+
+        <!-- 1 -->
+        <div class="client-card">
+          <span class="card-sweep" aria-hidden="true"></span>
+          <a class="card-ig-link" href="https://www.instagram.com/willnelson_coach_/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <div class="card-avatar">
+            <img src="Profile%20Pictures/Will%20Nelson.jpg" alt="Will Nelson" />
+          </div>
+          <div class="card-name">Will Nelson</div>
+          <div class="card-title">Business Coach</div>
+          <div class="card-divider"></div>
+          <div class="card-result-label">Result</div>
+          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+        </div>
+
+        <!-- 2 -->
+        <div class="client-card">
+          <span class="card-sweep" aria-hidden="true"></span>
+          <a class="card-ig-link" href="https://www.instagram.com/rachelscheer/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <div class="card-avatar">
+            <img src="Profile%20Pictures/Rachel%20Scheer.jpg" alt="Rachel Scheer" />
+          </div>
+          <div class="card-name">Rachel Scheer</div>
+          <div class="card-title">Fitness Business Coach</div>
+          <div class="card-divider"></div>
+          <div class="card-result-label">Result</div>
+          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+        </div>
+
+        <!-- 3 -->
+        <div class="client-card">
+          <span class="card-sweep" aria-hidden="true"></span>
+          <a class="card-ig-link" href="https://www.instagram.com/petrofitcoaching/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <div class="card-avatar">
+            <img src="Profile%20Pictures/Nick%20Burns.jpg" alt="Nick Burns" />
+          </div>
+          <div class="card-name">Nick Burns</div>
+          <div class="card-title">Fitness Coach</div>
+          <div class="card-divider"></div>
+          <div class="card-result-label">Result</div>
+          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+        </div>
+
+        <!-- 4 -->
+        <div class="client-card">
+          <span class="card-sweep" aria-hidden="true"></span>
+          <a class="card-ig-link" href="https://www.instagram.com/azribiz/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <div class="card-avatar">
+            <img src="Profile%20Pictures/Azri%20Zakariya.jpg" alt="Azri Zakariya" />
+          </div>
+          <div class="card-name">Azri Zakariya</div>
+          <div class="card-title">Ads Coach</div>
+          <div class="card-divider"></div>
+          <div class="card-result-label">Result</div>
+          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+        </div>
+
+        <!-- 5 -->
+        <div class="client-card">
+          <span class="card-sweep" aria-hidden="true"></span>
+          <a class="card-ig-link" href="https://www.instagram.com/dripking/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <div class="card-avatar">
+            <img src="Profile%20Pictures/Caleb%20Hammett.jpg" alt="Caleb Hammett" />
+          </div>
+          <div class="card-name">Caleb Hammett</div>
+          <div class="card-title">Christian Fitness Coach</div>
+          <div class="card-divider"></div>
+          <div class="card-result-label">Result</div>
+          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+        </div>
+
+        <!-- 6 -->
+        <div class="client-card">
+          <span class="card-sweep" aria-hidden="true"></span>
+          <a class="card-ig-link" href="https://www.instagram.com/thealigilbert/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <div class="card-avatar">
+            <img src="Profile%20Pictures/Ali%20Gilbert.jpg" alt="Ali Gilbert" />
+          </div>
+          <div class="card-name">Ali Gilbert</div>
+          <div class="card-title">Men's Health Coach</div>
+          <div class="card-divider"></div>
+          <div class="card-result-label">Result</div>
+          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+        </div>
+
+        <!-- 7 -->
+        <div class="client-card">
+          <span class="card-sweep" aria-hidden="true"></span>
+          <a class="card-ig-link" href="https://www.instagram.com/tony_stephan_/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <div class="card-avatar">
+            <img src="Profile%20Pictures/Tony%20Stephan.jpg" alt="Tony Stephan" />
+          </div>
+          <div class="card-name">Tony Stephan</div>
+          <div class="card-title">Real Estate Coach</div>
+          <div class="card-divider"></div>
+          <div class="card-result-label">Result</div>
+          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+        </div>
+
+        <!-- 8 -->
+        <div class="client-card">
+          <span class="card-sweep" aria-hidden="true"></span>
+          <a class="card-ig-link" href="https://www.instagram.com/danielleruban/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <div class="card-avatar">
+            <img src="Profile%20Pictures/Danielle%20Ruban.jpg" alt="Danielle Ruban" />
+          </div>
+          <div class="card-name">Danielle Ruban</div>
+          <div class="card-title">IFBB Pro &amp; Fitness Coach</div>
+          <div class="card-divider"></div>
+          <div class="card-result-label">Result</div>
+          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+        </div>
+
+        <!-- 9 -->
+        <div class="client-card">
+          <span class="card-sweep" aria-hidden="true"></span>
+          <a class="card-ig-link" href="https://www.instagram.com/physicianvitalitycollective/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <div class="card-avatar">
+            <img src="Profile%20Pictures/Mike%20Coval.jpg" alt="Mike Coval" />
+          </div>
+          <div class="card-name">Mike Coval</div>
+          <div class="card-title">Surgeon Fitness Coach</div>
+          <div class="card-divider"></div>
+          <div class="card-result-label">Result</div>
+          <div class="card-result">Placeholder result — <strong>coming soon.</strong></div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Bottom CTA -->
+    <section class="bottom-cta">
+      <div class="bottom-cta-glow"></div>
+      <h2 class="reveal">Ready to scale past $50K/mo?</h2>
+      <p class="reveal">Watch the training above, then take the first step — we'll put together a custom plan for your coaching business.</p>
+      <a href="#" class="btn-primary reveal" onclick="openModal(); return false;">
+        <span class="btn-sweep" aria-hidden="true"></span>
+        Apply to Work With Us
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2.5 7h9M7.5 3.5L11 7l-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span class="footer-logo"><span class="nav-dot"></span>VL Agency</span>
+      <span class="footer-copy">&copy; 2026 &middot; All rights reserved</span>
+    </footer>
+
+  </div><!-- /.page -->
+
+  <!-- ─── Application Modal ─── -->
+  <div class="modal-overlay" id="applyModal" role="dialog" aria-modal="true" aria-label="Apply to work with us">
+    <div class="modal-box" id="modalBox">
+
+      <button class="modal-close" id="modalClose" aria-label="Close">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M1 1l11 11M12 1L1 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="modal-inner">
+
+        <div class="modal-progress">
+          <div class="modal-progress-fill" id="modalProgressFill" style="width:20%"></div>
+        </div>
+
+        <!-- ── Step 1: Contact Info ── -->
+        <div class="form-step active" id="step1">
+          <div class="modal-step-label">Step 1 of 5</div>
+          <h2 class="form-heading">Let's get started</h2>
+          <p class="form-sub">Tell us a bit about yourself so we know how to reach you.</p>
+
+          <div class="field-group">
+            <label class="field-label" for="inputName">Your Name</label>
+            <input class="field-input" id="inputName" type="text" placeholder="Full name" autocomplete="name" />
+            <div class="field-error" id="nameError">Please enter your name.</div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">
+              How can we contact you?
+              <span class="field-note">&nbsp;— fill at least one</span>
+            </label>
+            <div class="contact-rows">
+              <div class="contact-row">
+                <span class="contact-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                </span>
+                <input class="field-input" id="inputInstagram" type="text" placeholder="Instagram handle" />
+              </div>
+              <div class="contact-row">
+                <span class="contact-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+                </span>
+                <input class="field-input" id="inputEmail" type="email" placeholder="Email address" autocomplete="email" />
+              </div>
+              <div class="contact-row">
+                <span class="contact-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3 1.24h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 9a16 16 0 0 0 5.91 5.91l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </span>
+                <input class="field-input" id="inputPhone" type="tel" placeholder="Phone number" autocomplete="tel" />
+              </div>
+            </div>
+            <div class="field-error" id="contactError">Please fill in at least one contact method.</div>
+          </div>
+
+          <div class="modal-nav">
+            <span></span>
+            <button class="btn-modal-next" onclick="nextStep()">
+              Next
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M2 6.5h9M7.5 3L11 6.5 7.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Step 2: Current Situation ── -->
+        <div class="form-step" id="step2">
+          <div class="modal-step-label">Step 2 of 5</div>
+          <h2 class="form-heading">What best describes your current situation?</h2>
+          <p class="form-sub">Pick the option that fits you most right now.</p>
+          <div class="options-list" id="options2">
+            <div class="option-card" data-q="2" data-val="A" onclick="selectOption(this)">
+              <span class="option-badge">A</span>
+              <span class="option-text">I run ads, but results could be better.</span>
+            </div>
+            <div class="option-card" data-q="2" data-val="B" onclick="selectOption(this)">
+              <span class="option-badge">B</span>
+              <span class="option-text">I have an offer &amp; audience but need help delegating content + a funnel.</span>
+            </div>
+            <div class="option-card" data-q="2" data-val="C" onclick="selectOption(this)">
+              <span class="option-badge">C</span>
+              <span class="option-text">My ads work, but I need better creatives to convert more.</span>
+            </div>
+            <div class="option-card" data-q="2" data-val="D" onclick="selectOption(this)">
+              <span class="option-badge">D</span>
+              <span class="option-text">I'm just starting out and need a roadmap.</span>
+            </div>
+          </div>
+          <div class="field-error" id="error2">Please select an option to continue.</div>
+          <div class="modal-nav">
+            <button class="btn-modal-back" onclick="prevStep()">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M11 6.5H2M5.5 3L2 6.5 5.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Back
+            </button>
+            <button class="btn-modal-next" onclick="nextStep()">
+              Next
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M2 6.5h9M7.5 3L11 6.5 7.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Step 3: Biggest Challenge ── -->
+        <div class="form-step" id="step3">
+          <div class="modal-step-label">Step 3 of 5</div>
+          <h2 class="form-heading">What's your biggest challenge right now?</h2>
+          <p class="form-sub">Be honest — this helps us tailor the right solution for you.</p>
+          <div class="options-list" id="options3">
+            <div class="option-card" data-q="3" data-val="A" onclick="selectOption(this)">
+              <span class="option-badge">A</span>
+              <span class="option-text">No time to create content, need it done for me.</span>
+            </div>
+            <div class="option-card" data-q="3" data-val="B" onclick="selectOption(this)">
+              <span class="option-badge">B</span>
+              <span class="option-text">My content isn't getting clients.</span>
+            </div>
+            <div class="option-card" data-q="3" data-val="C" onclick="selectOption(this)">
+              <span class="option-badge">C</span>
+              <span class="option-text">My ads need better creatives.</span>
+            </div>
+            <div class="option-card" data-q="3" data-val="D" onclick="selectOption(this)">
+              <span class="option-badge">D</span>
+              <span class="option-text">I need a funnel that turns content into paying clients.</span>
+            </div>
+          </div>
+          <div class="field-error" id="error3">Please select an option to continue.</div>
+          <div class="modal-nav">
+            <button class="btn-modal-back" onclick="prevStep()">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M11 6.5H2M5.5 3L2 6.5 5.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Back
+            </button>
+            <button class="btn-modal-next" onclick="nextStep()">
+              Next
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M2 6.5h9M7.5 3L11 6.5 7.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Step 4: Monthly Revenue ── -->
+        <div class="form-step" id="step4">
+          <div class="modal-step-label">Step 4 of 5</div>
+          <h2 class="form-heading">What is your current monthly revenue from coaching?</h2>
+          <p class="form-sub">This helps us understand exactly where you are right now.</p>
+          <div class="options-list" id="options4">
+            <div class="option-card" data-q="4" data-val="A" onclick="selectOption(this)">
+              <span class="option-badge">A</span>
+              <span class="option-text">$0 – $10K /mo</span>
+            </div>
+            <div class="option-card" data-q="4" data-val="B" onclick="selectOption(this)">
+              <span class="option-badge">B</span>
+              <span class="option-text">$10K – $30K /mo</span>
+            </div>
+            <div class="option-card" data-q="4" data-val="C" onclick="selectOption(this)">
+              <span class="option-badge">C</span>
+              <span class="option-text">$30K – $50K /mo</span>
+            </div>
+            <div class="option-card" data-q="4" data-val="D" onclick="selectOption(this)">
+              <span class="option-badge">D</span>
+              <span class="option-text">$50K+ /mo</span>
+            </div>
+          </div>
+          <div class="field-error" id="error4">Please select an option to continue.</div>
+          <div class="modal-nav">
+            <button class="btn-modal-back" onclick="prevStep()">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M11 6.5H2M5.5 3L2 6.5 5.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Back
+            </button>
+            <button class="btn-modal-next" onclick="nextStep()">
+              Next
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M2 6.5h9M7.5 3L11 6.5 7.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Step 5: Investment ── -->
+        <div class="form-step" id="step5">
+          <div class="modal-step-label">Step 5 of 5</div>
+          <h2 class="form-heading">How much are you ready to invest in content?</h2>
+          <p class="form-sub">Being real here helps us match you with the right package.</p>
+          <div class="options-list" id="options5">
+            <div class="option-card" data-q="5" data-val="A" onclick="selectOption(this)">
+              <span class="option-badge">A</span>
+              <span class="option-text">$0 — not ready to invest yet.</span>
+            </div>
+            <div class="option-card" data-q="5" data-val="B" onclick="selectOption(this)">
+              <span class="option-badge">B</span>
+              <span class="option-text">$0 – $500 /mo</span>
+            </div>
+            <div class="option-card" data-q="5" data-val="C" onclick="selectOption(this)">
+              <span class="option-badge">C</span>
+              <span class="option-text">$500 – $1,000 /mo</span>
+            </div>
+            <div class="option-card" data-q="5" data-val="D" onclick="selectOption(this)">
+              <span class="option-badge">D</span>
+              <span class="option-text">$1,000+ /mo</span>
+            </div>
+          </div>
+          <div class="field-error" id="error5">Please select an option to continue.</div>
+          <div class="modal-nav">
+            <button class="btn-modal-back" onclick="prevStep()">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M11 6.5H2M5.5 3L2 6.5 5.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Back
+            </button>
+            <button class="btn-modal-next" onclick="nextStep()">
+              Submit Application
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M2 6.5h9M7.5 3L11 6.5 7.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Step 6: Thank You ── -->
+        <div class="form-step" id="step6">
+          <div class="ty-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <h2 class="form-heading" style="text-align:center">Thanks for applying!</h2>
+          <p class="form-sub" style="text-align:center; margin-bottom:20px">
+            I will personally reach out to you in the next <strong style="color:#fff">24 hours</strong> to discuss how we can help you.<br /><br />
+            In the meantime, check out this client case study:
+          </p>
+          <div class="ty-video">
+            <div class="yt-poster" onclick="loadYT(this,'BtTRnjWHTUw')">
+              <img src="https://img.youtube.com/vi/BtTRnjWHTUw/maxresdefault.jpg" alt="Play Case Study" />
+              <button class="yt-play-btn" aria-label="Play video" tabindex="-1">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="margin-left:3px">
+                  <polygon points="5,3 21,12 5,21" fill="#202cff"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div style="text-align:center; margin-top:24px">
+            <button class="ty-back-btn" onclick="closeModal()">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M11 6.5H2M5.5 3L2 6.5 5.5 10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Back to Home Page
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /.modal-inner -->
+    </div><!-- /.modal-box -->
+  </div><!-- /.modal-overlay -->
+
+  <script>
+    // ─── Resend Email Config ──────────────────────────────────────────────
+    // Set your Resend API key and destination email below.
+    // The key will be requested after setup — leave as-is for now.
+    const RESEND = {
+      apiKey:    're_QKg6L56R_EvehL1N38v2BRv22Bnr8v87w',
+      toEmail:   'vlad@vlmedia.online',      // ← your email to receive leads
+      fromEmail: 'onboarding@resend.dev',  // ← change to your verified domain once set up
+    };
+
+    async function sendLeadEmail(data) {
+      if (!RESEND.apiKey || RESEND.apiKey === 'YOUR_RESEND_API_KEY') return; // skip if unconfigured
+
+      const situationMap = {
+        A: 'Runs ads, but results could be better',
+        B: 'Has offer & audience, needs content + funnel',
+        C: 'Ads work, needs better creatives to convert',
+        D: 'Just starting out, needs a roadmap',
+      };
+      const challengeMap = {
+        A: 'No time to create content — needs it done-for-them',
+        B: 'Content not getting clients',
+        C: 'Ads need better creatives',
+        D: 'Needs a funnel that turns content into paying clients',
+      };
+      const revenueMap = { A: '$0 – $10K/mo', B: '$10K – $30K/mo', C: '$30K – $50K/mo', D: '$50K+/mo' };
+      const investMap  = { A: '$0 (not ready)', B: '$0 – $500/mo', C: '$500 – $1,000/mo', D: '$1,000+/mo' };
+
+      const pill = (txt, color) =>
+        `<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:${color}20;color:${color};border:1px solid ${color}40">${txt}</span>`;
+
+      const row = (label, val, accent) => val ? `
+        <tr>
+          <td style="padding:12px 0;border-bottom:1px solid #12122a;color:#6b7280;font-size:13px;font-weight:500;width:36%;vertical-align:middle">${label}</td>
+          <td style="padding:12px 0;border-bottom:1px solid #12122a;font-size:14px;font-weight:600;color:${accent||'#fff'}">${val}</td>
+        </tr>` : '';
+
+      const html = `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#0a0a12;font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif">
+        <div style="max-width:580px;margin:32px auto;border-radius:20px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.6)">
+
+          <!-- Header -->
+          <div style="background:linear-gradient(135deg,#2030ff 0%,#1018cc 100%);padding:28px 32px 24px">
+            <p style="margin:0 0 6px;font-size:11px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.55)">VL Agency — New Lead</p>
+            <h1 style="margin:0;font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.02em">New Application Received</h1>
+            <p style="margin:8px 0 0;font-size:14px;color:rgba(255,255,255,0.65)">Someone just applied to work with you — reach out within 24 h.</p>
+          </div>
+
+          <!-- Contact block -->
+          <div style="background:#0f0f1e;padding:24px 32px 4px;border-bottom:1px solid #1a1a30">
+            <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#3a48ff">Contact</p>
+            <table style="width:100%;border-collapse:collapse">
+              ${row('Name', `<strong>${data.name}</strong>`)}
+              ${row('Instagram', data.instagram ? `<a href="https://instagram.com/${data.instagram.replace('@','')}" style="color:#6877ff;text-decoration:none">@${data.instagram.replace('@','')}</a>` : '')}
+              ${row('Email', data.email ? `<a href="mailto:${data.email}" style="color:#6877ff;text-decoration:none">${data.email}</a>` : '')}
+              ${row('Phone', data.phone)}
+            </table>
+          </div>
+
+          <!-- Qualification block -->
+          <div style="background:#0f0f1e;padding:24px 32px 4px;border-bottom:1px solid #1a1a30">
+            <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#3a48ff">Qualification</p>
+            <table style="width:100%;border-collapse:collapse">
+              ${row('Situation',  situationMap[data.q2], '#e2e8f0')}
+              ${row('Challenge',  challengeMap[data.q3], '#e2e8f0')}
+              ${row('Revenue',    pill(revenueMap[data.q4], '#22c55e'), '#fff')}
+              ${row('Investment', pill(investMap[data.q5],  '#f59e0b'), '#fff')}
+            </table>
+          </div>
+
+          <!-- Footer -->
+          <div style="background:#08081a;padding:16px 32px;display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:12px;color:#374151">Sent from your VSL landing page</span>
+            <span style="font-size:11px;color:#1f2937;letter-spacing:0.08em;text-transform:uppercase">VL Agency</span>
+          </div>
+
+        </div>
+      </body></html>`;
+
+      try {
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + RESEND.apiKey },
+          body: JSON.stringify({
+            from: RESEND.fromEmail,
+            to:   [RESEND.toEmail],
+            subject: `New Application: ${data.name}`,
+            html,
+          }),
+        });
+      } catch (err) {
+        console.warn('Resend notification failed (will not block form):', err);
+      }
+    }
+
+    // ─── Modal & Multi-step Application Form
+    let currentStep = 1;
+    const TOTAL_STEPS = 5;
+    const formAnswers = {};
+
+    function openModal() {
+      document.getElementById('applyModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('applyModal').classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(resetForm, 400);
+    }
+
+    function resetForm() {
+      goToStep(1, 'forward');
+      ['inputName','inputInstagram','inputEmail','inputPhone'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.querySelectorAll('.option-card.selected').forEach(el => el.classList.remove('selected'));
+      clearErrors();
+    }
+
+    function updateProgress() {
+      const pct = Math.min((currentStep / TOTAL_STEPS) * 100, 100);
+      document.getElementById('modalProgressFill').style.width = pct + '%';
+    }
+
+    function goToStep(step, direction) {
+      const box = document.getElementById('modalBox');
+      box.classList.toggle('going-back', direction === 'back');
+      const current = document.querySelector('.form-step.active');
+      if (current) current.classList.remove('active');
+      const next = document.getElementById('step' + step);
+      if (next) {
+        next.classList.add('active');
+        box.scrollTop = 0;
+      }
+      currentStep = step;
+      updateProgress();
+    }
+
+    function nextStep() {
+      if (!validateStep(currentStep)) return;
+      if (currentStep >= TOTAL_STEPS) {
+        // Collect all data and fire email notification
+        sendLeadEmail({
+          name:      document.getElementById('inputName').value.trim(),
+          instagram: document.getElementById('inputInstagram').value.trim(),
+          email:     document.getElementById('inputEmail').value.trim(),
+          phone:     document.getElementById('inputPhone').value.trim(),
+          q2: formAnswers.q2,
+          q3: formAnswers.q3,
+          q4: formAnswers.q4,
+          q5: formAnswers.q5,
+        });
+        goToStep(6, 'forward'); // thank you
+        return;
+      }
+      goToStep(currentStep + 1, 'forward');
+    }
+
+    function prevStep() {
+      if (currentStep <= 1) return;
+      goToStep(currentStep - 1, 'back');
+    }
+
+    function validateStep(step) {
+      clearErrors();
+      if (step === 1) {
+        const name = document.getElementById('inputName').value.trim();
+        const ig   = document.getElementById('inputInstagram').value.trim();
+        const em   = document.getElementById('inputEmail').value.trim();
+        const ph   = document.getElementById('inputPhone').value.trim();
+        let ok = true;
+        if (!name) { document.getElementById('nameError').classList.add('show'); ok = false; }
+        if (!ig && !em && !ph) { document.getElementById('contactError').classList.add('show'); ok = false; }
+        return ok;
+      }
+      if (step >= 2 && step <= 5) {
+        const sel = document.querySelector('#options' + step + ' .option-card.selected');
+        if (!sel) { document.getElementById('error' + step).classList.add('show'); return false; }
+        formAnswers['q' + step] = sel.dataset.val;
+      }
+      return true;
+    }
+
+    function clearErrors() {
+      document.querySelectorAll('.field-error.show').forEach(el => el.classList.remove('show'));
+    }
+
+    function selectOption(card) {
+      const q = card.dataset.q;
+      document.querySelectorAll('.option-card[data-q="' + q + '"]').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      const err = document.getElementById('error' + q);
+      if (err) err.classList.remove('show');
+    }
+
+    // Overlay click & keyboard
+    document.getElementById('applyModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('applyModal').classList.contains('open')) closeModal();
+    });
+
+    // ─── YouTube click-to-play
+    // On file:// protocol, YouTube blocks all iframe embeds (browser security).
+    // Workaround: open in new tab locally. On any real server, the inline iframe loads normally.
+    function loadYT(posterEl, videoId) {
+      if (window.location.protocol === 'file:') {
+        window.open('https://www.youtube.com/watch?v=' + videoId, '_blank');
+        return;
+      }
+      const iframe = document.createElement('iframe');
+      iframe.src = 'https://www.youtube-nocookie.com/embed/' + videoId + '?autoplay=1&rel=0&playsinline=1';
+      iframe.title = 'Video';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;display:block';
+      posterEl.replaceWith(iframe);
+    }
+
+    // ─── Smooth scroll for all anchor links
+    // CSS scroll-behavior on html breaks in Firefox when overflow-x is set.
+    // JS-driven scrollIntoView is bulletproof across all browsers.
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        const id = link.getAttribute('href');
+        if (id === '#') return;
+        const target = document.querySelector(id);
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
+    // ─── Parallax
+    // JS only ever touches .orb-track transform.
+    // CSS float animation only ever touches .orb transform.
+    // No conflict possible.
+    const t1 = document.getElementById('t1');
+    const t2 = document.getElementById('t2');
+    const t3 = document.getElementById('t3');
+    const t4 = document.getElementById('t4');
+
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const y = window.scrollY;
+          t1.style.transform = `translateY(${y * 0.18}px)`;
+          t2.style.transform = `translateY(${y * -0.13}px)`;
+          t3.style.transform = `translateY(${y * 0.09}px)`;
+          t4.style.transform = `translateY(${y * -0.22}px)`;
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+
+    // ─── Scroll-reveal
+    const revealEls = document.querySelectorAll('.reveal');
+    const revealObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => revealObs.observe(el));
+
+    // ─── Staggered card entrance
+    const cardEls = document.querySelectorAll('.client-card');
+    const cardObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const idx = [...cardEls].indexOf(e.target);
+          setTimeout(() => e.target.classList.add('visible'), idx * 80);
+          cardObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.06, rootMargin: '0px 0px -20px 0px' });
+    cardEls.forEach(el => cardObs.observe(el));
+
+    // ─── Cursor-aware radial glow on cards
+    cardEls.forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = ((e.clientX - r.left) / r.width  * 100).toFixed(1);
+        const y = ((e.clientY - r.top)  / r.height * 100).toFixed(1);
+        card.style.background = `
+          radial-gradient(circle at ${x}% ${y}%, rgba(32,44,255,0.09) 0%, rgba(255,255,255,0.02) 55%),
+          linear-gradient(135deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.01) 60%)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.background = '';
+      });
+    });
+  </script>
+
+</body>
+</html>
