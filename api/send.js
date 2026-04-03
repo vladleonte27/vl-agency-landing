@@ -1,6 +1,6 @@
 const RESEND_API_KEY = 're_QKg6L56R_EvehL1N38v2BRv22Bnr8v87w';
 const TO_EMAIL      = 'vlad@vlmedia.online';
-const FROM_EMAIL    = 'VL Agency <onboarding@resend.dev>';
+const FROM_EMAIL    = 'VL Agency <notifications@vlmedia.online>';
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
