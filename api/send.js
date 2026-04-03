@@ -9,7 +9,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
 
-  const { name, instagram, email, phone, q2, q3, q4, q5 } = req.body;
+  const { name, instagram, email, phone, q2, q3, q4 } = req.body;
 
   const situationMap = {
     A: 'Runs ads, but results could be better',
@@ -24,7 +24,6 @@ module.exports = async function handler(req, res) {
     D: 'Needs a funnel that turns content into paying clients',
   };
   const revenueMap = { A: '$0 – $10K/mo', B: '$10K – $30K/mo', C: '$30K – $50K/mo', D: '$50K+/mo' };
-  const investMap  = { A: '$0 (not ready yet)', B: '$0 – $500/mo', C: '$500 – $1,000/mo', D: '$1,000+/mo' };
 
   const pill = (txt, color) =>
     `<span style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;background:${color}22;color:${color};border:1px solid ${color}55">${txt}</span>`;
@@ -65,8 +64,7 @@ module.exports = async function handler(req, res) {
       <table style="width:100%;border-collapse:collapse">
         ${row('Situation',  situationMap[q2] || '—')}
         ${row('Challenge',  challengeMap[q3] || '—')}
-        ${row('Revenue',    pill(revenueMap[q4] || '—', '#22c55e'))}
-        ${row('Investment', pill(investMap[q5]  || '—', '#f59e0b'))}
+        ${row('Revenue', pill(revenueMap[q4] || '—', '#22c55e'))}
       </table>
     </div>
 
