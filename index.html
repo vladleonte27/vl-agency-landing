@@ -1833,16 +1833,22 @@
   </div><!-- /.modal-overlay -->
 
   <script>
-    // ─── Send lead email via serverless function (avoids CORS) ───────────
+    // ─── Send lead email via serverless function ─────────────────────────
     async function sendLeadEmail(data) {
       try {
-        await fetch('/api/send', {
+        const res = await fetch('/api/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          console.error('Email API error', res.status, json);
+        } else {
+          console.log('Email sent OK', json);
+        }
       } catch (err) {
-        console.warn('Email notification failed (will not block form):', err);
+        console.error('Email fetch failed:', err.message);
       }
     }
 
