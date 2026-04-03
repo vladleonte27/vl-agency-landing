@@ -558,6 +558,87 @@
       font-weight: 600;
     }
 
+    /* ─── Testimonials Section ─── */
+    .testimonials {
+      padding: 120px 24px;
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 64px;
+    }
+    .testimonial-card {
+      position: relative;
+      border-radius: var(--radius-card);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.01) 60%),
+        var(--glass-bg);
+      backdrop-filter: blur(40px) saturate(200%);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      border: 1px solid var(--glass-border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .testimonial-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.16), transparent);
+    }
+    .testimonial-meta {
+      padding: 26px 26px 20px;
+    }
+    .testimonial-stat {
+      font-size: clamp(22px, 2.4vw, 30px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      background: linear-gradient(135deg, #fff 0%, var(--blue-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+    }
+    .testimonial-timeframe {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .testimonial-divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.07), transparent);
+      margin-bottom: 14px;
+    }
+    .testimonial-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.01em;
+      margin-bottom: 2px;
+    }
+    .testimonial-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--blue-light);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .testimonial-video {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      background: #08081a;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    /* reuse .yt-poster styles — already defined */
+
     /* ─── Bottom CTA ─── */
     .bottom-cta {
       padding: 100px 24px 140px;
@@ -1144,6 +1225,20 @@
       .bottom-cta p { font-size: 15px; margin-bottom: 32px; }
       .bottom-cta .btn-primary { width: 100%; justify-content: center; }
 
+      /* Testimonials */
+      .testimonials { padding: 80px 20px; }
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        margin-top: 44px;
+      }
+      .testimonial-card {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: rgba(255,255,255,0.045);
+      }
+      .testimonial-video { aspect-ratio: 9 / 16; max-height: 520px; }
+
       /* Footer */
       .footer {
         flex-direction: column;
@@ -1410,6 +1505,86 @@
           <div class="card-divider"></div>
           <div class="card-result-label">Result</div>
           <div class="card-result"><strong>5x ROAS</strong> ads — went from $30K/mo to <strong>$80K/mo</strong>.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials">
+
+      <div class="section-label reveal">
+        <span class="section-label-line"></span>
+        <span class="section-label-text">In Their Own Words</span>
+      </div>
+      <h2 class="results-heading reveal">Hear it from them.</h2>
+      <p class="results-sub reveal">No scripts. No setups. Just real coaches sharing what happened.</p>
+
+      <div class="testimonials-grid">
+
+        <!-- Caleb -->
+        <div class="testimonial-card reveal">
+          <div class="testimonial-meta">
+            <div class="testimonial-stat">$70K &rarr; $170K</div>
+            <div class="testimonial-timeframe">in 30 days</div>
+            <div class="testimonial-divider"></div>
+            <div class="testimonial-name">Caleb Hammett</div>
+            <div class="testimonial-title">Christian Fitness Coach</div>
+          </div>
+          <div class="testimonial-video">
+            <div class="yt-poster" onclick="loadYT(this,'CALEB_VIDEO_ID')">
+              <img loading="lazy" src="https://img.youtube.com/vi/CALEB_VIDEO_ID/maxresdefault.jpg" alt="Caleb Hammett Testimonial" />
+              <button class="yt-play-btn" aria-label="Play testimonial" tabindex="-1">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="margin-left:3px">
+                  <polygon points="5,3 21,12 5,21" fill="#202cff"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Will -->
+        <div class="testimonial-card reveal">
+          <div class="testimonial-meta">
+            <div class="testimonial-stat">$100K &rarr; $1.5M/mo</div>
+            <div class="testimonial-timeframe">in one year</div>
+            <div class="testimonial-divider"></div>
+            <div class="testimonial-name">Will Nelson</div>
+            <div class="testimonial-title">Business Coach</div>
+          </div>
+          <div class="testimonial-video">
+            <div class="yt-poster" onclick="loadYT(this,'WILL_VIDEO_ID')">
+              <img loading="lazy" src="https://img.youtube.com/vi/WILL_VIDEO_ID/maxresdefault.jpg" alt="Will Nelson Testimonial" />
+              <button class="yt-play-btn" aria-label="Play testimonial" tabindex="-1">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="margin-left:3px">
+                  <polygon points="5,3 21,12 5,21" fill="#202cff"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dr. Mohamed -->
+        <div class="testimonial-card reveal">
+          <div class="testimonial-meta">
+            <div class="testimonial-stat">10X ROAS + $24K</div>
+            <div class="testimonial-timeframe">signed in 48 hours</div>
+            <div class="testimonial-divider"></div>
+            <div class="testimonial-name">Dr. Mohamed</div>
+            <div class="testimonial-title">Medical Coach</div>
+          </div>
+          <div class="testimonial-video">
+            <div class="yt-poster" onclick="loadYT(this,'MOHAMED_VIDEO_ID')">
+              <img loading="lazy" src="https://img.youtube.com/vi/MOHAMED_VIDEO_ID/maxresdefault.jpg" alt="Dr. Mohamed Testimonial" />
+              <button class="yt-play-btn" aria-label="Play testimonial" tabindex="-1">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="margin-left:3px">
+                  <polygon points="5,3 21,12 5,21" fill="#202cff"/>
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>
